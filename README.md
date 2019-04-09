@@ -46,16 +46,51 @@ Add cargo to your path in `.bashrc`
 
     export PATH=$PATH:/home/augusto/.cargo/bin
 
+Make this specific version the default
+
+    rustup default nightly-2018-12-23
+
+To be able to use other versions, one needs to either remove `futures-await` or wait for this PR
+
+    https://github.com/alexcrichton/futures-await/pull/112
+
 ## Install infrastructure
 
 Follow the instructions in the README.md file.
 
-## Clone contract's repo
+## Contracts
 
 Just
 
+    cd
     git clone --recurse-submodules git@github.com:cartesi/contracts.git
 
+Install npm, but don't let it uninstall `libssl-dev`.
+If this does not work
 
+    sudo apt-get install npm
 
+Try
 
+    curl -L https://www.npmjs.com/install.sh | sh
+
+Intall dependencies
+
+    cd contracts
+    npm install
+
+Compile them
+
+    ./node_modules/.bin/truffle compile
+
+## Watcher
+
+Install virtualenv
+
+    sudo apt-get install virtualenv
+
+In the infrastructure folder, create a virtual environment, activate it and install dependencies
+
+    virtualenv vir
+    . ./vir/bin/activate
+    pip install -r requirements.txt
