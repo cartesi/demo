@@ -94,3 +94,14 @@ In the infrastructure folder, create a virtual environment, activate it and inst
     virtualenv vir
     . ./vir/bin/activate
     pip install -r requirements.txt
+
+## Install demo dependencies
+
+Pythons stuff
+
+    mkvirtualenv -p `which python3` vir
+    pip install -r requirements.txt
+
+Deactivate with `deactivate` and reactivate again with `workon vir`.
+
+    git submodule update --init --recursive

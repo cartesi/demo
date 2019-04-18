@@ -1,0 +1,3 @@
+[submodule "core-manager"]
+	path = core-manager
+	url = git@github.com:cartesi/core-manager.git
