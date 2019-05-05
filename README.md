@@ -95,7 +95,19 @@ In the infrastructure folder, create a virtual environment, activate it and inst
     . ./vir/bin/activate
     pip install -r requirements.txt
 
+## RISC-V solidity
+
+Download it::
+
+   git clone git@github.com/cartesi/riscv-solidity.git
+
+Follow the instructions in the `README.md` file.
+
 ## Install demo dependencies
+
+Node stuff
+
+    npm install
 
 Pythons3 stuff
 
