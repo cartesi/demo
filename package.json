@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "truffle": "^5.0.12",
+    "web3": "^1.0.0-beta.36"
+  },
+  "devDependencies": {
+    "solidity-coverage": "^0.5.11"
+  }
+}
