@@ -97,9 +97,10 @@ In the infrastructure folder, create a virtual environment, activate it and inst
 
 ## Install demo dependencies
 
-Pythons stuff
+Pythons3 stuff
 
-    mkvirtualenv -p `which python3` vir
+    sudo apt install python3-venv
+    python3 -m venv vir
     pip install -r requirements.txt
 
 Deactivate with `deactivate` and reactivate again with `workon vir`.
