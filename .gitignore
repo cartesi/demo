@@ -1,2 +1,4 @@
 vir/*
 node_modules/*
+test-files/*
+.ipynb_checkpoints/*

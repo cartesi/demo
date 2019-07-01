@@ -1,0 +1,9 @@
+url: http://192.168.0.28:8545
+testing: true
+max_delay: 500
+warn_delay: 30
+emulator_port: 50051
+query_port: 3001
+confirmations: 0
+#After processed, this file with have the main concern and concerns section
+#automatically generated, so don't create those entries since they will be overwritten

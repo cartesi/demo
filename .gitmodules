@@ -1,3 +1,9 @@
 [submodule "core-manager"]
 	path = core-manager
 	url = git@github.com:cartesi/core-manager.git
+[submodule "cartesi-blockchain-node"]
+	path = cartesi-blockchain-node
+	url = git@github.com:cartesi/cartesi-blockchain-node.git
+[submodule "infrastructure"]
+	path = infrastructure
+	url = git@github.com:cartesi/infrastructure.git

@@ -10,7 +10,7 @@ import subprocess
 
 #So the cartesi GRPC modules are in path
 import sys
-sys.path.insert(0,'core-manager/core/cartesi-grpc/py')
+sys.path.insert(0,'core-manager/cartesi-grpc/py')
 
 import core_pb2
 import cartesi_base_pb2
@@ -38,79 +38,25 @@ BOOTARGS = "bootargs"
 
 CONTAINER_SERVER = False
 
-TEST_ROM = {
-        #BOOTARGS: "console=hvc0 rootfstype=ext2 root=/dev/mtdblock0 rw -- /mnt/job/demo.sh"
-    BOOTARGS: "console=hvc0 rootfstype=ext2 root=/dev/mtdblock0 rw -- /bin/sh -c 'echo test && touch /mnt/output/test && cat /mnt/job/demo.sh && /mnt/job/demo.sh && echo test2' && cat /mnt/output/out"
-}
-
 TEST_RAM = {
-    LENGTH: 64 << 20, #2**26 or 67108864
+    LENGTH: 1 << 20,
     BACKING: "kernel.bin"
 }
 
 CONTAINER_BASE_PATH = "/root/host/"
 NATIVE_BASE_PATH = "{}/test-files/".format(os.path.dirname(os.path.realpath(__file__)))
-OUTPUT_DRIVE_NAME = "out"
-PRISTINE_OUTPUT_DRIVE_NAME = "out_pristine.ext2"
 
 DEBUG_STEP_FROM = None
 DEBUG_STEP_FROM_FILENAME = "step_from_{}_output.json"
 DEBUG_RUN_UP_TO = None
 DEBUG_RUN_UP_TO_FILENAME = "run_up_to_{}_output.json"
 
-def get_test_drives_config():
-    return [
-        {
-            BACKING: "rootfs.ext2",
-            SHARED: False,
-            LABEL: "root filesystem"
-        },
-        {
-            BACKING: "input.ext2",
-            SHARED: False,
-            LABEL: "input"
-        },
-        {
-            BACKING: "job.ext2",
-            SHARED: False,
-            LABEL: "job"
-        },
-        {
-            BACKING: "{}.ext2".format(OUTPUT_DRIVE_NAME),
-            #SHARED: True, #Must be False on verification game since the drive
-            #contents don't follow the rollbacks and cartesi machine recreation
-            #that happen during verification games
-            SHARED: False,
-            LABEL: "output"
-        }
-    ]
-
-
-TEST_DRIVES = get_test_drives_config()
-
 def make_new_session_request():
     files_dir = NATIVE_BASE_PATH
     if (CONTAINER_SERVER):
         files_dir = CONTAINER_BASE_PATH
-
-    drives_msg = []
-    rom_msg = cartesi_base_pb2.ROM(bootargs=TEST_ROM[BOOTARGS])
     ram_msg = cartesi_base_pb2.RAM(length=TEST_RAM[LENGTH], backing=files_dir + TEST_RAM[BACKING])
-    drive_start = 1 << 63
-    for drive in TEST_DRIVES:
-        drive_path = files_dir + drive[BACKING]
-        drive_size = os.path.getsize(NATIVE_BASE_PATH + drive[BACKING])
-        drive_msg = cartesi_base_pb2.Drive(start=drive_start, length=drive_size,
-                                           backing=drive_path, shared=drive[SHARED],
-                                           label=drive[LABEL])
-        drives_msg.append(drive_msg)
-        #New drive start is the next potency of 2 from drive_size, but must be
-        #at least 1 MB
-        new_drive_start = drive_start + int(max((2**(math.log(drive_size,2) - math.log(drive_size,2) % 1 + 1)), 1024*1024))
-        print("Drive start: {}\nNew drive size: {}\nNew drive start: {}".format(drive_start, drive_size, new_drive_start))
-        drive_start = new_drive_start
-
-    machine_msg = cartesi_base_pb2.MachineRequest(rom=rom_msg, ram=ram_msg, flash=drives_msg)
+    machine_msg = cartesi_base_pb2.MachineRequest(ram=ram_msg)
     return manager_high_pb2.NewSessionRequest(session_id=TEST_SESSION_ID, machine=machine_msg)
 
 def address(add):
@@ -140,12 +86,12 @@ def get_args():
     parser.add_argument('--address', '-a', type=address, dest='address', default=DEFAULT_ADD, help="Core manager GRPC server address")
     parser.add_argument('--port', '-p', type=port_number, dest='port', default=DEFAULT_PORT, help="Core manager GRPC server port")
     parser.add_argument('--container', '-c', action="store_true", dest="container_server", help="Core manager GPRC server is running from docker container")
-    parser.add_argument('--output_drive_name', '-o', dest="output_drive_name", help="Core manager GPRC server is running from docker container")
     parser.add_argument('--debug_step_from', '-s', type=positive_integer, dest="debug_step_from", help="When set, this programs steps from the provided cycle number and dumps the GRPC output in json format to file")
     parser.add_argument('--debug_run_up_to', '-r', type=positive_integer, dest="debug_run_up_to", help="When set, this programs runs up to the provided cycle number and dumps the GRPC output in json format to file")
     parser.add_argument('--debug_step_from_dump_filename', '-sf', dest="debug_step_from_filename", help="Custom filename for step dump files")
     parser.add_argument('--debug_run_up_to_dump_filename', '-rf', dest="debug_run_up_to_filename", help="Custom filename for run dump files")
     parser.add_argument('--session_id', '-i', dest="session_id", help="Custom session id")
+    parser.add_argument('--ram_backing', '-rb', dest="ram_backing", help="file to use as RAM backing")
 
     args = parser.parse_args()
 
@@ -155,17 +101,15 @@ def get_args():
     global DEBUG_RUN_UP_TO
     global DEBUG_RUN_UP_TO_FILENAME
     global TEST_SESSION_ID
-    global OUTPUT_DRIVE_NAME
-    global TEST_DRIVES
+    global TEST_RAM
     
     CONTAINER_SERVER = args.container_server
 
+    if args.ram_backing:
+        TEST_RAM[BACKING] = args.ram_backing
+    
     if args.session_id:        
         TEST_SESSION_ID = args.session_id
-    
-    if args.output_drive_name:
-        OUTPUT_DRIVE_NAME = args.output_drive_name
-        TEST_DRIVES = get_test_drives_config()
 
     if (args.debug_step_from != None):
         DEBUG_STEP_FROM = args.debug_step_from
@@ -184,18 +128,6 @@ def get_args():
             DEBUG_RUN_UP_TO_FILENAME = DEBUG_RUN_UP_TO_FILENAME.format(DEBUG_RUN_UP_TO)
             
     return (args.address, args.port)
-
-def make_output_fs_copy():
-    files_dir = NATIVE_BASE_PATH
-    if (CONTAINER_SERVER):
-        files_dir = CONTAINER_BASE_PATH
-
-    cp_proc = subprocess.Popen(["cp", NATIVE_BASE_PATH + PRISTINE_OUTPUT_DRIVE_NAME, NATIVE_BASE_PATH + OUTPUT_DRIVE_NAME + '.ext2'], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    out, err = cp_proc.communicate()
-
-    if (cp_proc.returncode):
-        print("Failed to copy inout.ext2")
-        sys.exit(1)
 
 def dump_run_response_to_file(run_resp):
     resp_dict = {"summaries": [], "hashes": []}
@@ -246,9 +178,9 @@ def dump_step_response_to_file(access_log):
         for sibling in access.proof.sibling_hashes:
             access_dict['proof']['sibling_hashes'].append("{}".format(sibling.content.hex()))
 
-        #Putting the access log data structure inside a list to conform to the format expected by the programs that consume this log
         access_log_dict['accesses'].append(access_dict)
 
+    #Putting the access log data structure inside a list to conform to the format expected by the programs that consume this log
     json_dump = json.dumps([access_log_dict], indent=4, sort_keys=True)
 
     with open(DEBUG_STEP_FROM_FILENAME, 'w') as dump_file:
@@ -258,7 +190,6 @@ def run():
     responses = []
     srv_add, srv_port = get_args() 
     conn_str = "{}:{}".format(srv_add, srv_port)
-    make_output_fs_copy()
     print("Connecting to server in " + conn_str)
     with grpc.insecure_channel(conn_str) as channel:
         stub_low = manager_low_pb2_grpc.MachineManagerLowStub(channel)

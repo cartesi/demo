@@ -63,11 +63,11 @@ byobu send-keys -t 5 "hashers finished." ENTER
 sleep 6
 
 byobu send-keys -t 5 "cd ~/core-demo" ENTER
-byobu send-keys -t 5 ". ./vir/bin/activate" ENTER
+byobu send-keys -t 5 "workon vir" ENTER
 byobu send-keys -t 5 "python initialize_machine.py -c" ENTER
 byobu send-keys -t 6 "cd ~/core-demo" ENTER
-byobu send-keys -t 6 ". ./vir/bin/activate" ENTER
-byobu send-keys -t 6 "python initialize_machine.py -c -p 50052" ENTER
+byobu send-keys -t 6 "workon vir" ENTER
+byobu send-keys -t 6 "python initialize_machine.py -c -p 50052 -o out_defective" ENTER
 
 sleep 6
 
@@ -141,6 +141,6 @@ byobu send-keys -t 2 "cargo run --bin compute"
 byobu send-keys -t 3 "cargo run --bin compute"
 
 byobu send-keys -t 5 "cd ~/infrastructure" ENTER
-byobu send-keys -t 5 ". ./vir/bin/activate" ENTER
+byobu send-keys -t 5 "workon vir2" ENTER
 byobu send-keys -t 5 "python watcher.py"
 byobu send-keys -t 6 "exit" ENTER
