@@ -42,11 +42,6 @@ byobu send-keys -t 6 "printf '\033]2;Bob Monitor\033\\'" ENTER
 byobu set -g pane-border-status top
 byobu set -g pane-border-format " #{pane_title} "
 
-
-export RUST_LOG=dispatcher=trace,transaction=trace,configuration=trace,utils=trace,state=trace,compute=trace,hasher=trace
-byobu send-keys -t 2 "export RUST_LOG=$RUST_LOG" ENTER
-byobu send-keys -t 3 "export RUST_LOG=$RUST_LOG" ENTER
-
 byobu send-keys -t 5 "# Wait to start machine managers... "
 byobu send-keys -t 0 "./execute_machine_manager_ephemeral_container.sh" ENTER
 byobu send-keys -t 1 "./execute_defective_machine_manager_ephemeral_container.sh" ENTER
