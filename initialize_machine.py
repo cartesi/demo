@@ -10,7 +10,7 @@ import subprocess
 
 #So the cartesi GRPC modules are in path
 import sys
-sys.path.insert(0,'core-manager/core/cartesi-grpc/py')
+sys.path.insert(0,'machine-manager/machine-emulator/lib/grpc-interfaces/py')
 
 import core_pb2
 import cartesi_base_pb2
@@ -25,8 +25,7 @@ import argparse
 #from IPython import embed
 
 SLEEP_TIME = 5
-DEFAULT_PORT = 50051
-DEFAULT_ADD = 'localhost'
+DEFAULT_ADD = 'localhost:50051'
 
 TEST_SESSION_ID = "test_new_session_id"
 START = "start"
@@ -39,8 +38,8 @@ BOOTARGS = "bootargs"
 CONTAINER_SERVER = False
 
 TEST_ROM = {
-        #BOOTARGS: "console=hvc0 rootfstype=ext2 root=/dev/mtdblock0 rw -- /mnt/job/demo.sh"
-    BOOTARGS: "console=hvc0 rootfstype=ext2 root=/dev/mtdblock0 rw -- /bin/sh -c 'echo test && touch /mnt/output/test && cat /mnt/job/demo.sh && /mnt/job/demo.sh && echo test2' && cat /mnt/output/out"
+    BOOTARGS: "console=hvc0 rootfstype=ext2 root=/dev/mtdblock0 rw {} -- /bin/sh -c 'echo test && touch /mnt/output/test && cat /mnt/job/demo.sh && /mnt/job/demo.sh && echo test2' && cat /mnt/output/out",
+    BACKING: "rom-linux.bin"
 }
 
 TEST_RAM = {
@@ -63,7 +62,7 @@ def get_test_drives_config():
         {
             BACKING: "rootfs.ext2",
             SHARED: False,
-            LABEL: "root filesystem"
+            LABEL: "rootfs"
         },
         {
             BACKING: "input.ext2",
@@ -88,21 +87,28 @@ def get_test_drives_config():
 
 TEST_DRIVES = get_test_drives_config()
 
+def build_mtdparts_str(drives):
+
+    mtdparts_str = "mtdparts="
+
+    for i,drive in enumerate(drives):
+        mtdparts_str += "flash.%d:-(%s)".format(i, drive[LABEL])
+
+    return mtdparts_str
+
 def make_new_session_request():
     files_dir = NATIVE_BASE_PATH
     if (CONTAINER_SERVER):
         files_dir = CONTAINER_BASE_PATH
 
     drives_msg = []
-    rom_msg = cartesi_base_pb2.ROM(bootargs=TEST_ROM[BOOTARGS])
     ram_msg = cartesi_base_pb2.RAM(length=TEST_RAM[LENGTH], backing=files_dir + TEST_RAM[BACKING])
     drive_start = 1 << 63
     for drive in TEST_DRIVES:
         drive_path = files_dir + drive[BACKING]
         drive_size = os.path.getsize(NATIVE_BASE_PATH + drive[BACKING])
         drive_msg = cartesi_base_pb2.Drive(start=drive_start, length=drive_size,
-                                           backing=drive_path, shared=drive[SHARED],
-                                           label=drive[LABEL])
+                                           backing=drive_path, shared=drive[SHARED])
         drives_msg.append(drive_msg)
         #New drive start is the next potency of 2 from drive_size, but must be
         #at least 1 MB
@@ -110,21 +116,11 @@ def make_new_session_request():
         print("Drive start: {}\nNew drive size: {}\nNew drive start: {}".format(drive_start, drive_size, new_drive_start))
         drive_start = new_drive_start
 
+    bootargs_str = TEST_ROM[BOOTARGS].format(build_mtdparts_str(TEST_DRIVES))
+    rom_msg = cartesi_base_pb2.ROM(bootargs=bootargs_str, backing=files_dir + TEST_ROM[BACKING])
+
     machine_msg = cartesi_base_pb2.MachineRequest(rom=rom_msg, ram=ram_msg, flash=drives_msg)
     return manager_high_pb2.NewSessionRequest(session_id=TEST_SESSION_ID, machine=machine_msg)
-
-def address(add):
-    #TODO: validate address
-    return add
-
-def port_number(port):
-    try:
-        int_port = int(port)
-        if not(0 <= int_port <= 65535):
-            raise argparse.ArgumentTypeError("Please provide a valid port from 0 to 65535")
-    except:
-        raise argparse.ArgumentTypeError("Please provide a valid port from 0 to 65535")
-    return port
 
 def positive_integer(num):
     try:
@@ -136,11 +132,10 @@ def positive_integer(num):
     return int_num
 
 def get_args():
-    parser = argparse.ArgumentParser(description='GRPC client to the high level emulator API (core manager)')
-    parser.add_argument('--address', '-a', type=address, dest='address', default=DEFAULT_ADD, help="Core manager GRPC server address")
-    parser.add_argument('--port', '-p', type=port_number, dest='port', default=DEFAULT_PORT, help="Core manager GRPC server port")
-    parser.add_argument('--container', '-c', action="store_true", dest="container_server", help="Core manager GPRC server is running from docker container")
-    parser.add_argument('--output_drive_name', '-o', dest="output_drive_name", help="Core manager GPRC server is running from docker container")
+    parser = argparse.ArgumentParser(description='GRPC client to the high level emulator API (machine manager)')
+    parser.add_argument('--address', '-a', dest='address', default=DEFAULT_ADD, help="Machine manager GRPC server address")
+    parser.add_argument('--container', '-c', action="store_true", dest="container_server", help="Machine manager GPRC server is running from docker container")
+    parser.add_argument('--output_drive_name', '-o', dest="output_drive_name", help="Machine manager GPRC server is running from docker container")
     parser.add_argument('--debug_step_from', '-s', type=positive_integer, dest="debug_step_from", help="When set, this programs steps from the provided cycle number and dumps the GRPC output in json format to file")
     parser.add_argument('--debug_run_up_to', '-r', type=positive_integer, dest="debug_run_up_to", help="When set, this programs runs up to the provided cycle number and dumps the GRPC output in json format to file")
     parser.add_argument('--debug_step_from_dump_filename', '-sf', dest="debug_step_from_filename", help="Custom filename for step dump files")
@@ -157,33 +152,33 @@ def get_args():
     global TEST_SESSION_ID
     global OUTPUT_DRIVE_NAME
     global TEST_DRIVES
-    
+
     CONTAINER_SERVER = args.container_server
 
-    if args.session_id:        
+    if args.session_id:
         TEST_SESSION_ID = args.session_id
-    
+
     if args.output_drive_name:
         OUTPUT_DRIVE_NAME = args.output_drive_name
         TEST_DRIVES = get_test_drives_config()
 
     if (args.debug_step_from != None):
         DEBUG_STEP_FROM = args.debug_step_from
-                
+
         if (args.debug_step_from_filename != None):
             DEBUG_STEP_FROM_FILENAME = args.debug_step_from_filename
         else:
             DEBUG_STEP_FROM_FILENAME = DEBUG_STEP_FROM_FILENAME.format(DEBUG_STEP_FROM)
 
-    if (args.debug_run_up_to != None):   
+    if (args.debug_run_up_to != None):
         DEBUG_RUN_UP_TO = args.debug_run_up_to
-        
+
         if (args.debug_run_up_to_filename != None):
             DEBUG_RUN_UP_TO_FILENAME = args.debug_run_up_to_filename
         else:
             DEBUG_RUN_UP_TO_FILENAME = DEBUG_RUN_UP_TO_FILENAME.format(DEBUG_RUN_UP_TO)
-            
-    return (args.address, args.port)
+
+    return args.address
 
 def make_output_fs_copy():
     files_dir = NATIVE_BASE_PATH
@@ -256,11 +251,10 @@ def dump_step_response_to_file(access_log):
 
 def run():
     responses = []
-    srv_add, srv_port = get_args() 
-    conn_str = "{}:{}".format(srv_add, srv_port)
+    srv_add = get_args()
     make_output_fs_copy()
-    print("Connecting to server in " + conn_str)
-    with grpc.insecure_channel(conn_str) as channel:
+    print("Connecting to server in " + srv_add)
+    with grpc.insecure_channel(srv_add) as channel:
         stub_low = manager_low_pb2_grpc.MachineManagerLowStub(channel)
         stub_high = manager_high_pb2_grpc.MachineManagerHighStub(channel)
         try:
