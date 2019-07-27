@@ -33,30 +33,30 @@ def get_args():
     global OUTPUT_CONFIG_FILE
     global USER_ADD
 
-    if args.base_config_file:        
+    if args.base_config_file:
         BASE_CONFIG_FILE = args.base_config_file
-    
+
     if args.output_config_file:
-        OUTPUT_CONFIG_FILE = args.output_config_file        
+        OUTPUT_CONFIG_FILE = args.output_config_file
 
     if (args.user_add != None):
         USER_ADD = args.user_add
 
 def replace_deployed_info_in_base_config(conf_yaml, dep_info_yaml):
     conf_yaml['concerns']=[]
-    
+
     for concern in dep_info_yaml['concerns']:
         replaced_concern = {}
-        
+
         if USER_ADD:
             replaced_concern['user_address'] = USER_ADD
         else:
             replaced_concern['user_address'] = concern['user_address']
         replaced_concern['contract_address'] = concern['contract_address']
-        
+
         abi_name = concern['abi'].split('/')[-1]
         replaced_concern['abi'] = BASE_ABI_PATH + abi_name
-        
+
         #Checking if it is the main concern or not
         if abi_name == "ComputeInstantiator.json":
             conf_yaml['main_concern'] = replaced_concern
@@ -71,7 +71,7 @@ def load_contracts_deployment_info():
         except yaml.YAMLError as exc:
             print("Error trying to load contracts deployment info yaml:")
             print(exc)
-            sys.exit(1)        
+            sys.exit(1)
 
 def write_dynamic_confs(conf_yaml):
     dep_info_yaml = load_contracts_deployment_info()
@@ -89,11 +89,11 @@ with open(BASE_CONFIG_FILE, 'r') as base_yaml_file:
         print("Error trying to load yaml base configuration:")
         print(exc)
         sys.exit(1)
-        
+
     custom_yaml = write_dynamic_confs(loaded_yaml)
-    
+
     print("Dumping final configuration to file:\n{}".format(yaml.dump(custom_yaml, default_flow_style=False)))
-    
+
     with open(OUTPUT_CONFIG_FILE, 'w') as custom_yaml_file:
         yaml.dump(custom_yaml, custom_yaml_file, default_flow_style=False)
 
