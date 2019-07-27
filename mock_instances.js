@@ -5,11 +5,11 @@ const Web3 = require('web3');
 const fs = require('fs');
 const yaml = require('js-yaml');
 
-const BLOCKCHAIN_INFO_DIR = "cartesi-blockchain-node/exported-node-files";
+const BLOCKCHAIN_INFO_DIR = "blockchain-node/exported-node-files";
 const STEP_CONTRACT_ADD_FILENAME = BLOCKCHAIN_INFO_DIR + "/step.add";
 const CONTRACTS_YAML_FILENAME = BLOCKCHAIN_INFO_DIR + "/deployed_dispute_contracts.yaml";
 const COMPUTE_INSTANTIATOR_ABI_FILENAME = BLOCKCHAIN_INFO_DIR + "/ComputeInstantiator.json"
-const initial_hash = "0xd38044010b5a765ae84bd1e548bf00d824d0d62fd1fd8bb2708e7fb4df3ac5de";
+const initial_hash = "0xc7e2b1fbc7e499cca84d5bf8eb89a7e8c683e1605a7ebda9c3362fa491d556c8";
 const TOTAL_NUMBER = 1;
 const MAIN_ACCOUNT = "0x2ad38f50f38abc5cbcf175e1962293eecc7936de";
 const SECOND_ACCOUNT = "0x8b5432ca3423f3c310eba126c1d15809c61aa0a9";

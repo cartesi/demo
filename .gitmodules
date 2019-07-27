@@ -1,9 +1,9 @@
-[submodule "infrastructure"]
-	path = infrastructure
-	url = git@github.com:cartesi/infrastructure.git
 [submodule "machine-manager"]
 	path = machine-manager
 	url = git@github.com:cartesi/machine-manager.git
 [submodule "blockchain-node"]
 	path = blockchain-node
 	url = git@github.com:cartesi/blockchain-node.git
+[submodule "arbitration-dlib"]
+	path = arbitration-dlib
+	url = git@github.com:cartesi/arbitration-dlib.git

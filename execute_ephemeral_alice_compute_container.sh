@@ -1,0 +1,2 @@
+docker run -it --name ephemeral-alice-compute -p 127.0.0.1:3001:3001 -v `pwd`:/root/host --rm cartesi/image-compute bash -c "export CARTESI_CONCERN_KEY=0x339565dd96968ad4fba67e320bc9cf07808298d3654634e1bcc3b46350964f6e && mkdir -p /opt/cartesi/working_path && mkdir -p /opt/cartesi/blockchain/abis && cp /root/host/blockchain-node/exported-node-files/*.json /opt/cartesi/blockchain/abis && cat /root/host/dispatcher_config.yaml && cargo run -- --config_path /root/host/dispatcher_config.yaml --working_path /opt/cartesi/working_path"
+

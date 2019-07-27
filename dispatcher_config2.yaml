@@ -9,7 +9,9 @@ concerns:
   contract_address: '0x63664106a027195f368B8ac0e20C460f95e570C4'
   user_address: '0x8b5432ca3423f3c310eba126c1d15809c61aa0a9'
 confirmations: 0
-emulator_port: 50052
+emulator_transport:
+  address: 192.168.0.28
+  port: 50052
 main_concern:
   abi: /opt/cartesi/blockchain/abis/ComputeInstantiator.json
   contract_address: '0xbE35F0971d377C0CC290288539434E6D4C13cc7d'
@@ -17,5 +19,5 @@ main_concern:
 max_delay: 500
 query_port: 3002
 testing: true
-url: http://127.0.0.1:8545
+url: http://192.168.0.28:8545
 warn_delay: 30
