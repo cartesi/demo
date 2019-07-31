@@ -4,7 +4,7 @@ max_delay: 500
 warn_delay: 30
 emulator_transport:
     address: 192.168.0.28
-    port: 50052
+    port: 50051
 query_port: 3002
 confirmations: 0
 #After processed, this file with have the main concern and concerns section

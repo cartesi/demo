@@ -2,3 +2,5 @@ vir/*
 node_modules/*
 test-files/*
 .ipynb_checkpoints/*
+dispatcher_config_alice.yaml
+dispatcher_config_bob.yaml

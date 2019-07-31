@@ -59,9 +59,16 @@ sleep 6
 echo -n "Starting Ganache..."
 byobu send-keys -t 5 "# Wait to start Ganache... "
 byobu send-keys -t 4 "cd blockchain-node && ./execute_cartesi_blockchain_node_ephemeral_container.sh" ENTER
-sleep 30s
+sleep 5s
 echo " Ganache ready."
 byobu send-keys -t 5 "Ganache ready." ENTER
+
+byobu send-keys -t 6 "#Creating compute config files ..."
+#Creating Alice config file
+byobu send-keys -t 5 "python dispatcher_config_generator.py -b base_dispatcher_config_alice.yaml -o dispatcher_config_alice.yaml -wmm -obn -ua 0x2AD38F50f38Abc5CbcF175e1962293EEcc7936De" ENTER
+#Creating Bob config file
+byobu send-keys -t 5 "python dispatcher_config_generator.py -b base_dispatcher_config_bob.yaml -o dispatcher_config_bob.yaml -dmm -obn -ua 0x8b5432ca3423f3c310eba126c1d15809c61aa0a9" ENTER
+byobu send-keys -t 6 "# Done" ENTER
 
 echo -n "Moking instances..."
 byobu send-keys -t 5 "# Wait to mock instances..."
