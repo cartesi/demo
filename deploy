@@ -47,14 +47,7 @@ byobu send-keys -t 0 "./execute_machine_manager_ephemeral_container.sh" ENTER
 byobu send-keys -t 1 "./execute_defective_machine_manager_ephemeral_container.sh" ENTER
 byobu send-keys -t 5 "machine managers started." ENTER
 
-sleep 6
-
-byobu send-keys -t 5 "workon vir" ENTER
-byobu send-keys -t 5 "python initialize_machine.py -c" ENTER
-byobu send-keys -t 6 "workon vir" ENTER
-byobu send-keys -t 6 "python initialize_machine.py -c -a localhost:50052 -o out_defective" ENTER
-
-sleep 6
+sleep 6s
 
 echo -n "Starting Ganache..."
 byobu send-keys -t 5 "# Wait to start Ganache... "
@@ -63,16 +56,36 @@ sleep 5s
 echo " Ganache ready."
 byobu send-keys -t 5 "Ganache ready." ENTER
 
+byobu send-keys -t 5 "# Building demo dapp image if needed (this may take some minutes)... "
+#Build demo-dapp-image
+./build_demo_dapp_image.sh
+byobu send-keys -t 5 " Done." ENTER
+
+sleep 2s
+
+MM_ADD=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ephemeral-machine-manager`
+DEFECTIVE_MM_ADD=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ephemeral-defective-machine-manager`
+
+byobu send-keys -t 5 "./execute_initialize_machine_through_docker.sh $MM_ADD" ENTER
+byobu send-keys -t 6 "./execute_initialize_defective_machine_through_docker.sh $DEFECTIVE_MM_ADD" ENTER
+
+sleep 15s
+
 byobu send-keys -t 6 "#Creating compute config files ..."
 #Creating Alice config file
-byobu send-keys -t 5 "python dispatcher_config_generator.py -b base_dispatcher_config_alice.yaml -o dispatcher_config_alice.yaml -wmm -obn -ua 0x2AD38F50f38Abc5CbcF175e1962293EEcc7936De" ENTER
+byobu send-keys -t 5 "./make_alice_dispatcher_config.sh" ENTER
 #Creating Bob config file
-byobu send-keys -t 5 "python dispatcher_config_generator.py -b base_dispatcher_config_bob.yaml -o dispatcher_config_bob.yaml -dmm -obn -ua 0x8b5432ca3423f3c310eba126c1d15809c61aa0a9" ENTER
+sleep 15s
+byobu send-keys -t 5 "./make_bob_dispatcher_config.sh" ENTER
+sleep 15s
 byobu send-keys -t 6 "# Done" ENTER
+
+ETH_NODE_ADD=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ephemeral-cartesi-blockchain-node`
 
 echo -n "Moking instances..."
 byobu send-keys -t 5 "# Wait to mock instances..."
-byobu send-keys -t 2 "./mock_instances.js" ENTER
+byobu send-keys -t 2 "./execute_mock_instances_through_docker.sh $ETH_NODE_ADD" ENTER
+sleep 10
 echo " instantiation finished."
 byobu send-keys -t 5 "mocking finished" ENTER "clear" ENTER
 
@@ -82,4 +95,4 @@ byobu send-keys -t 3 "./execute_ephemeral_bob_compute_container.sh" ENTER
 byobu send-keys -t 5 "#should start the watcher" ENTER
 byobu send-keys -t 5 "#workon vir2" ENTER
 byobu send-keys -t 5 "#python watcher.py"
-byobu send-keys -t 6 "exit" ENTER
+#byobu send-keys -t 6 "exit" ENTER

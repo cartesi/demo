@@ -4,6 +4,7 @@ const os = require('os');
 const Web3 = require('web3');
 const fs = require('fs');
 const yaml = require('js-yaml');
+const program = require('commander');
 
 const BLOCKCHAIN_INFO_DIR = "blockchain-node/exported-node-files";
 const STEP_CONTRACT_ADD_FILENAME = BLOCKCHAIN_INFO_DIR + "/step.add";
@@ -14,7 +15,14 @@ const TOTAL_NUMBER = 1;
 const MAIN_ACCOUNT = "0x2ad38f50f38abc5cbcf175e1962293eecc7936de";
 const SECOND_ACCOUNT = "0x8b5432ca3423f3c310eba126c1d15809c61aa0a9";
 
-var web3 = new Web3('http://127.0.0.1:8545', null,
+program
+    .option('-e, --ethereum-node-url <url>', 'URL of ethereum node', 'http://127.0.0.1:8545')
+
+program.parse(process.argv);
+
+console.log("Connecting to " + program.ethereumNodeUrl);
+
+var web3 = new Web3(program.ethereumNodeUrl, null,
                     {transactionConfirmationBlocks: 1});
 
 const contracts_yaml = yaml.safeLoad(fs.readFileSync(CONTRACTS_YAML_FILENAME, 'utf-8'));

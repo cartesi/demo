@@ -6,13 +6,15 @@ import subprocess
 import traceback
 
 BASE_CONFIG_FILE = "base_dispatcher_config.yaml"
-CONTRACTS_DEPLOYMENT_INFO_FILE = "deployed_dispute_contracts.yaml"
+CONTRACTS_DEPLOYMENT_INFO_FILE = "blockchain-node/exported-node-files/deployed_dispute_contracts.yaml"
 OUTPUT_CONFIG_FILE = "dispatcher_config.yaml"
 BASE_ABI_PATH = "/opt/cartesi/blockchain/abis/"
+DOCKERIZED_ADD_DIR = "/root/host"
 USER_ADD = None
 OVERRIDE_BLOCKCHAIN_NODE = False
 OVERRIDE_WORKING_MM = False
 OVERRIDE_DEFECTIVE_MM = False
+DOCKERIZED = False
 
 def address(add_str):
     try:
@@ -35,6 +37,8 @@ def get_args():
     set_machine_manager_parser.add_argument('--working_machine_manager', '-wmm', dest='working_mm', action='store_true', default=False, help="Override emulator address to point to the working machine manager (Default: False)")
     set_machine_manager_parser.add_argument('--defective_machine_manager', '-dmm', dest='defective_mm', action='store_true', default=False, help="Override emulator address to point to the defective machine manager (Default: False)")
     parser.add_argument('--override_blockchain_node', '-obn', dest='override_bn', action='store_true', default=False, help="Override the blockchain node address. Should only be used with the bundled ganache-based docker container (Default: False)")
+    parser.add_argument('--dockerized', '-d', dest='dockerized', action='store_true', default=False, help="Specify that this app is being execute within a docker container (Default: False)")
+
 
     args = parser.parse_args()
 
@@ -44,6 +48,10 @@ def get_args():
     global OVERRIDE_BLOCKCHAIN_NODE
     global OVERRIDE_WORKING_MM
     global OVERRIDE_DEFECTIVE_MM
+    global DOCKERIZED
+
+    if args.dockerized:
+        DOCKERIZED = True
 
     if args.base_config_file:
         BASE_CONFIG_FILE = args.base_config_file
@@ -101,17 +109,23 @@ def get_container_ip_address(container_name):
 
     add = ""
 
-    #Making docker inspect command
-    cmd_line = ["docker", "inspect", "-f", "'{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'", container_name]
+    #Making docker inspect command or dig depending on whether running from docker container
+    if DOCKERIZED:
+        cmd_line = ["cat", "{}/{}.add".format(DOCKERIZED_ADD_DIR, container_name)]
+    else:
+        cmd_line = ["docker", "inspect", "-f", "'{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'", container_name]
 
     try:
+        print("Executing: {}".format(' '.join(cmd_line)))
         #Running docker inspect command to recover container address
         proc = subprocess.Popen(cmd_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         out, err = proc.communicate()
 
         if (proc.returncode == 0):
-            add = out.decode("utf-8").strip()[1:-1]
+            add = out.decode("utf-8").strip()
+            if not DOCKERIZED:
+                add = add[1:-1]
             print("Output for inspecting {} container address: {}".format(container_name, add))
 
         else:

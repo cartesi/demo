@@ -1,13 +1,7 @@
 {
-  "scripts": {
-    "test": "mocha"
-  },
   "dependencies": {
-    "truffle": "^5.0.12",
-    "web3": "^1.0.0-beta.36",
-    "js-yaml": "^3.12.1"
-  },
-  "devDependencies": {
-    "solidity-coverage": "^0.5.11"
+    "commander": "^2.20.0",
+    "js-yaml": "^3.12.1",
+    "web3": "^1.0.0-beta.36"
   }
 }
