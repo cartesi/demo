@@ -44,7 +44,6 @@ RUN \
 COPY dispatcher_config_generator.py initialize_machine.py mock_instances.js $BASE/
 COPY $BLOCKCHAIN_INFO_DIR/step.add $BLOCKCHAIN_INFO_DIR/deployed_dispute_contracts.yaml $BLOCKCHAIN_INFO_DIR/ComputeInstantiator.json $BASE/$BLOCKCHAIN_INFO_DIR/
 COPY $GRPC_DIR $BASE/$GRPC_DIR
-COPY test-files $BASE/test-files
 
 WORKDIR $BASE/$GRPC_DIR
 
