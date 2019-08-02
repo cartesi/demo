@@ -1,120 +1,64 @@
-# core-demo
+# Cartesi Demo
 
-## Install core-manager through Docker
+The Cartesi Demo is a showcase for a simple dapp that uses all Cartesi Modules. It consists of a very simple dapp that triggers a Verification Game (VG) between two parties (Alice and Bob). Alice disputes Bob's result for the demo dapp execution and runs the dapp correctly. Bob, on the other hand, simulates a party that is not behaving correctly and executes the dapp in a defective environment in which the clock of the Cartesi Machine saturates at a determined cycle.
 
-Install
+This repository contains everything that is needed to generate docker images for all the Cartesi Modules and two high level scripts to build everything from scratch and run the demo.
 
-    sudo apt-get install docker.io
+## Getting Started
 
-Add your user to docker group
+### Requirements
 
-    sudo addgroup augusto docker
+- Docker >= 18.09
+- Byobu >= 5.127
+- Wget
+- Unzip
 
-Clone cartesi repos
+### Clone the repository with submodules
 
-    git clone --recurse-submodules git@github.com:cartesi/core-manager.git
-    git clone git@github.com:cartesi/image-ci.git
+```bash
+$ git clone --recursive git@github.com:cartesi/demo.git
+```
 
-Build the image
+### Enter the directory and execute the demo preparation script
 
-    docker build -t image-ci .
+```bash
+$ cd demo
+$ ./prepare_demo.sh
+```
 
-Run the image
+This script builds multiple docker images so it takes a while to complete
 
-    docker run -v ~/core-manager:/root/host --name emulator image-ci
+### Run the deploy script that triggers the demo inside byobu
 
-From now on, run it with
+```bash
+$ byobu
+$./deploy
+```
 
-    docker start emulator
-    docker exec -it emulator bash
+From here the script spawns multiple terminal windows and starts:
 
-Enter the right folder inside the container
+- A Cartesi contracts enabled ganache instance
+- Two machine managers (one for Alice and another for Bob)
+- Two compute nodes (one for Alice and another for Bob)
+- The simple demo dapp scripts that trigger the Cartesi Machine of the sample computation for Alice and Bob and the Verification Game dispute
 
-    cd /root/host/coer/src/emulator
-    make clean
-    make grpc
+The demo ends when the Verification Game is concluded and arbitrates Alice as the winner.
 
-## Install rust nightly
+## Contributing
 
+Pull requests are welcome. When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change.
 
-There are instructions on the internet, building or `curl | sh`
+Please note we have a code of conduct, please follow it in all your interactions with the project.
 
-    curl -f -L https://static.rust-lang.org/rustup.sh -O
-    sh rustup.sh --default-toolchain=nightly
+## Authors
 
-Add cargo to your path in `.bashrc`
+* *Augusto Teixeira*
+* *Carlo Fragni*
 
-    export PATH=$PATH:/home/augusto/.cargo/bin
+## License
 
-Make this specific version the default
+- TODO
 
-    rustup default nightly-2018-12-23
+## Acknowledgments
 
-To be able to use other versions, one needs to either remove `futures-await` or wait for this PR
-
-    https://github.com/alexcrichton/futures-await/pull/112
-
-## Install infrastructure
-
-Follow the instructions in the README.md file.
-
-## Contracts
-
-Just
-
-    cd
-    git clone --recurse-submodules git@github.com:cartesi/contracts.git
-
-Install npm, but don't let it uninstall `libssl-dev`.
-If this does not work
-
-    sudo apt-get install npm
-
-Try
-
-    curl -L https://www.npmjs.com/install.sh | sh
-
-Intall dependencies
-
-    cd contracts
-    npm install
-
-Compile them
-
-    ./node_modules/.bin/truffle compile
-
-## Watcher
-
-Install virtualenv
-
-    sudo apt-get install virtualenv
-
-In the infrastructure folder, create a virtual environment, activate it and install dependencies
-
-    virtualenv vir
-    . ./vir/bin/activate
-    pip install -r requirements.txt
-
-## RISC-V solidity
-
-Download it::
-
-   git clone git@github.com/cartesi/riscv-solidity.git
-
-Follow the instructions in the `README.md` file.
-
-## Install demo dependencies
-
-Node stuff
-
-    npm install
-
-Pythons3 stuff
-
-    sudo apt install python3-venv
-    python3 -m venv vir
-    pip install -r requirements.txt
-
-Deactivate with `deactivate` and reactivate again with `workon vir`.
-
-    git submodule update --init --recursive
+- Original work
