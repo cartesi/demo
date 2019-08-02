@@ -29,7 +29,7 @@ byobu select-layout tiled
 byobu split-window -v
 byobu select-layout "dae7,169x41,0,0{84x41,0,0[84x4,0,0{42x4,0,0,3,41x4,43,0,9},84x15,0,5,4,84x15,0,21,5,84x4,0,37,6],84x41,85,0[84x20,85,0,7,84x20,85,21,8]}"
 
-sleep 2
+sleep 2s
 
 byobu send-keys -t 0 "printf '\033]2;Alice machine\033\\'" ENTER
 byobu send-keys -t 1 "printf '\033]2;Bob machine\033\\'" ENTER
@@ -47,12 +47,12 @@ byobu send-keys -t 0 "./execute_machine_manager_ephemeral_container.sh" ENTER
 byobu send-keys -t 1 "./execute_defective_machine_manager_ephemeral_container.sh" ENTER
 byobu send-keys -t 5 "machine managers started." ENTER
 
-sleep 6s
+sleep 10s
 
 echo -n "Starting Ganache..."
 byobu send-keys -t 5 "# Wait to start Ganache... "
 byobu send-keys -t 4 "cd blockchain-node && ./execute_cartesi_blockchain_node_ephemeral_container.sh" ENTER
-sleep 5s
+sleep 10s
 echo " Ganache ready."
 byobu send-keys -t 5 "Ganache ready." ENTER
 
@@ -61,7 +61,7 @@ byobu send-keys -t 5 "# Building demo dapp image if needed (this may take some m
 ./build_demo_dapp_image.sh
 byobu send-keys -t 5 " Done." ENTER
 
-sleep 2s
+sleep 5s
 
 MM_ADD=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ephemeral-machine-manager`
 DEFECTIVE_MM_ADD=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ephemeral-defective-machine-manager`
@@ -95,4 +95,4 @@ byobu send-keys -t 3 "./execute_ephemeral_bob_compute_container.sh" ENTER
 byobu send-keys -t 5 "#should start the watcher" ENTER
 byobu send-keys -t 5 "#workon vir2" ENTER
 byobu send-keys -t 5 "#python watcher.py"
-#byobu send-keys -t 6 "exit" ENTER
+byobu send-keys -t 6 "exit" ENTER
