@@ -91,7 +91,7 @@ Please note we have a [Code of Conduct](https://github.com/cartesi/demo/blob/mas
 
 ## License
 
-The demo repository and all contributions are licensed under[APACHE 2.0](https://www.apache.org/licenses/LICENSE-2.0). Please review our [LICENSE](https://github.com/cartesi/demo/blob/master/LICENSE) file.
+The demo repository and all contributions are licensed under [APACHE 2.0](https://www.apache.org/licenses/LICENSE-2.0). Please review our [LICENSE](https://github.com/cartesi/demo/blob/master/LICENSE) file.
 
 ## Acknowledgments
 
