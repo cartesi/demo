@@ -69,7 +69,7 @@ DEFECTIVE_MM_ADD=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAdd
 byobu send-keys -t 5 "./execute_initialize_machine_through_docker.sh $MM_ADD" ENTER
 byobu send-keys -t 6 "./execute_initialize_defective_machine_through_docker.sh $DEFECTIVE_MM_ADD" ENTER
 
-sleep 15s
+sleep 30s
 
 byobu send-keys -t 6 "#Creating compute config files ..."
 #Creating Alice config file
