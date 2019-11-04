@@ -1,3 +1,5 @@
+> :warning: The Cartesi team keeps working internally on the next version of this repository, following its regular development roadmap. Whenever there's a new version ready or important fix, these are published to the public source tree as new releases.
+
 # Cartesi Demo
 
 The Cartesi Demo is a showcase for a simple dapp that uses all Cartesi Modules. It consists of a very simple dapp that triggers a Verification Game (VG) between two parties (Alice and Bob). Alice disputes Bob's result for the demo dapp execution and runs the dapp correctly. Bob, on the other hand, simulates a party that is not behaving correctly and executes the dapp in a defective environment in which the clock of the Cartesi Machine saturates at a determined cycle.
